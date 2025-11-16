@@ -65,6 +65,20 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
                 modifier = Modifier.fillMaxWidth()
             )
 
+            // 🔥 AÑADIMOS EL BOTÓN DE RECUPERAR CONTRASEÑA AQUÍ
+            Spacer(modifier = Modifier.height(10.dp))
+
+            TextButton(
+                onClick = {
+                    navController.navigate(AppScreens.RContraseña.route)
+                }
+            ) {
+                Text(
+                    text = "¿Has olvidado tu contraseña?",
+                    color = FootballBlack
+                )
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
 
             Button(

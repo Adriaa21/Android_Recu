@@ -19,6 +19,7 @@ fun AppNavigation(startDestination: String = AppScreens.Login.route) {
         composable(AppScreens.Login.route) { LoginScreen(navController, firebaseService) }
         composable(AppScreens.Registro.route) { RegistroScreen(navController, firebaseService) }
         composable(AppScreens.Home.route) { HomeScreen(navController, firebaseService) }
+        composable(AppScreens.RContraseña.route) { RecuperarContrasenaScreen(navController, firebaseService) }
     }
 
 }

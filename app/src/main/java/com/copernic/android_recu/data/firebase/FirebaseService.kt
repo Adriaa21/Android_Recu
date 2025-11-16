@@ -44,6 +44,18 @@ class FirebaseService {
         }
     }
 
+    suspend fun enviarCorreoRecuperacion(correo: String): Result<Unit> {
+        return try {
+            auth.setLanguageCode("es")
+            auth.sendPasswordResetEmail(correo).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
+
     fun getCurrentUser() = auth.currentUser
 
     fun logout() {
