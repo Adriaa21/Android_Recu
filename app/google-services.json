@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "352331062412",
+    "project_id": "recu-af40b",
+    "storage_bucket": "recu-af40b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:352331062412:android:da47e1e0f07ab078276fa9",
+        "android_client_info": {
+          "package_name": "com.copernic.android_recu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_pUFshgHrf-zdYQN59enUARMGUx_WMdI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
