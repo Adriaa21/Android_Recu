@@ -17,19 +17,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.copernic.android_recu.presentation.navigation.AppScreens
 
-// COLORES PRINCIPALES
-
 val FootballGreen = Color(0xFF4CAF50)
 val FootballGreenDark = Color(0xFF1B5E20)
 val FootballWhite = Color(0xFFFFFFFF)
 val FootballBlack = Color(0xFF000000)
 val FootballGray = Color(0xFFBDBDBD)
 
-// ESTILO PARA BOTONES REDONDOS
-
 val RoundedButtonShape = RoundedCornerShape(50.dp)
-
-// HEADER
 
 @Composable
 fun RecuHeader(title: String) {
@@ -49,10 +43,9 @@ fun RecuHeader(title: String) {
     }
 }
 
-// FOOTER PRELOGIN
-
 @Composable
 fun RecuFooterPreLogin(navController: NavController) {
+
     val navigationBarHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current)
 
     Box(
@@ -65,10 +58,12 @@ fun RecuFooterPreLogin(navController: NavController) {
             ),
         contentAlignment = Alignment.Center
     ) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
+
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(onClick = { navController.navigate(AppScreens.Login.route) }) {
                     Icon(
@@ -77,7 +72,6 @@ fun RecuFooterPreLogin(navController: NavController) {
                         tint = FootballBlack,
                         modifier = Modifier.size(30.dp)
                     )
-
                 }
                 Text("Login", color = FootballBlack)
             }
@@ -90,10 +84,73 @@ fun RecuFooterPreLogin(navController: NavController) {
                         tint = FootballBlack,
                         modifier = Modifier.size(30.dp)
                     )
-
                 }
                 Text("Registrarse", color = FootballBlack)
             }
         }
     }
 }
+
+@Composable
+fun RecuFooterPostLogin(navController: NavController) {
+
+    val navigationBarHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(FootballGreen)
+            .padding(
+                bottom = with(LocalDensity.current) { navigationBarHeight.toDp() } + 8.dp,
+                top = 10.dp
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+
+            // 🔵 BOTÓN 1 - Equipos
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                IconButton(onClick = { /* TODO: Equipos */ }) {
+                    Icon(
+                        Icons.Filled.Menu,
+                        contentDescription = "Equipos",
+                        tint = FootballBlack,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                Text("Equipos", color = FootballBlack)
+            }
+
+            // 🔵 BOTÓN 2 - Home
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                IconButton(onClick = { navController.navigate(AppScreens.Home.route) }) {
+                    Icon(
+                        Icons.Filled.Home,
+                        contentDescription = "Home",
+                        tint = FootballBlack,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                Text("Home", color = FootballBlack)
+            }
+
+            // 🔵 BOTÓN 3 - Perfil
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                IconButton(onClick = { /* TODO: Perfil */ }) {
+                    Icon(
+                        Icons.Filled.Person,
+                        contentDescription = "Perfil",
+                        tint = FootballBlack,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                Text("Perfil", color = FootballBlack)
+            }
+        }
+    }
+}
+

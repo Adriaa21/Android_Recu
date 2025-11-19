@@ -3,5 +3,6 @@ package com.copernic.android_recu.model
 data class User(
     val id: String = "",
     val username: String = "",
-    val email: String = ""
+    val email: String = "",
+    val rol: String = "USER"
 )
