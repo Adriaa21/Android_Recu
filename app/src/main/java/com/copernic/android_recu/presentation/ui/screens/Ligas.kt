@@ -31,11 +31,18 @@ fun LigaBody(navController: NavController, firebaseService: FirebaseService) {
     var ligas by remember { mutableStateOf<List<Liga>>(emptyList()) }
     var cargando by remember { mutableStateOf(true) }
 
+    // 🔍 Campo de búsqueda
+    var filtro by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         scope.launch {
             ligas = firebaseService.obtenerLigas()
             cargando = false
         }
+    }
+
+    val ligasFiltradas = ligas.filter {
+        it.nombre.contains(filtro, ignoreCase = true)
     }
 
     Column(
@@ -45,21 +52,33 @@ fun LigaBody(navController: NavController, firebaseService: FirebaseService) {
     ) {
         RecuHeader(title = "Ligas")
 
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)
-            .padding(16.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(16.dp)
         ) {
+
+            // 🔍 BARRA DE BÚSQUEDA
+            OutlinedTextField(
+                value = filtro,
+                onValueChange = { filtro = it },
+                label = { Text("Buscar liga por nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             if (cargando) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            } else if (ligas.isEmpty()) {
+            } else if (ligasFiltradas.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No hay ligas añadidas.")
+                    Text("No se encontraron ligas.")
                 }
             } else {
-                ligas.forEach { liga ->
+                ligasFiltradas.forEach { liga ->
                     LigaCard(liga)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -79,7 +98,13 @@ fun LigaCard(liga: Liga) {
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Row(modifier = Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
             Image(
                 painter = rememberAsyncImagePainter(liga.imagen),
                 contentDescription = liga.nombre,
@@ -93,7 +118,11 @@ fun LigaCard(liga: Liga) {
             Column {
                 Text(text = liga.nombre, style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(6.dp))
-                Text(text = liga.descripcion, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
+                Text(
+                    text = liga.descripcion,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2
+                )
             }
         }
     }
