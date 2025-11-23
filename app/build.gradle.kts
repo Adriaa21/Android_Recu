@@ -57,14 +57,18 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose.android)
 
+
+
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
+    implementation ("com.google.maps.android:maps-compose:2.11.4")
 
     // Imágenes
     implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.play.services.maps)
 
     // Testing
     testImplementation(libs.junit)

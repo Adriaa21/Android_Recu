@@ -61,10 +61,12 @@ class AdminViewModel(private val firebaseService: FirebaseService) : ViewModel()
         viewModelScope.launch {
             if (equipo.id.isBlank()) firebaseService.addEquipo(equipo)
             else firebaseService.updateEquipo(equipo)
+
             cargarDatos()
             showPopupEquipo = false
         }
     }
+
 
     fun editLiga(liga: Liga) {
         ligaEdit = liga

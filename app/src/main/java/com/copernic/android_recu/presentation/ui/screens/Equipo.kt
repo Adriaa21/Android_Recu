@@ -18,6 +18,10 @@ import com.copernic.android_recu.data.firebase.FirebaseService
 import com.copernic.android_recu.model.Equipo
 import com.copernic.android_recu.model.Liga
 import com.copernic.android_recu.presentation.ui.theme.*
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @Composable
@@ -28,22 +32,26 @@ fun EquipoScreen(navController: NavController, firebaseService: FirebaseService)
 @Composable
 fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
 
+    val scope = rememberCoroutineScope()
+
     var equipos by remember { mutableStateOf<List<Equipo>>(emptyList()) }
     var ligas by remember { mutableStateOf<Map<String, Liga>>(emptyMap()) }
+    var cargando by remember { mutableStateOf(true) }
 
-    // 🔍 Campo de búsqueda
     var filtro by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        val snapEquipos = firebaseService.db.collection("equipos").get().await()
-        equipos = snapEquipos.toObjects(Equipo::class.java)
+        scope.launch {
+            val snapEquipos = firebaseService.db.collection("equipos").get().await()
+            equipos = snapEquipos.toObjects(Equipo::class.java)
 
-        val snapLigas = firebaseService.db.collection("ligas").get().await()
-        val listaLigas = snapLigas.toObjects(Liga::class.java)
-        ligas = listaLigas.associateBy { it.id }
+            val snapLigas = firebaseService.db.collection("ligas").get().await()
+            ligas = snapLigas.toObjects(Liga::class.java).associateBy { it.id }
+
+            cargando = false
+        }
     }
 
-    // 🔍 Filtrado
     val equiposFiltrados = equipos.filter {
         it.nombre.contains(filtro, ignoreCase = true)
     }
@@ -53,17 +61,11 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
             .fillMaxSize()
             .background(FootballWhite)
     ) {
+
         RecuHeader(title = "Equipos")
 
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(16.dp)
-        ) {
-
-            // 🔍 BARRA DE BÚSQUEDA
             OutlinedTextField(
                 value = filtro,
                 onValueChange = { filtro = it },
@@ -71,21 +73,18 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-            if (equipos.isEmpty()) {
-
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No hay equipos añadidos.", color = FootballBlack)
+            if (cargando) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-
             } else if (equiposFiltrados.isEmpty()) {
-
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No se encontraron equipos.")
                 }
-
             } else {
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -100,36 +99,60 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                                 .padding(vertical = 10.dp),
                             colors = CardDefaults.cardColors(FootballGray)
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Image(
-                                    painter = rememberAsyncImagePainter(equipo.imagenUrl),
-                                    contentDescription = equipo.nombre,
-                                    modifier = Modifier
-                                        .size(70.dp)
-                                        .padding(end = 12.dp),
-                                    contentScale = ContentScale.Crop
-                                )
+                            Column(modifier = Modifier.padding(12.dp)) {
 
-                                Column {
-                                    Text(
-                                        text = equipo.nombre,
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            color = FootballWhite
-                                        )
+                                // IMAGEN + NOMBRE
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+
+                                    Image(
+                                        painter = rememberAsyncImagePainter(equipo.imagenUrl),
+                                        contentDescription = equipo.nombre,
+                                        modifier = Modifier
+                                            .size(80.dp)
+                                            .padding(end = 12.dp),
+                                        contentScale = ContentScale.Crop
                                     )
-                                    Text(
-                                        text = ligaNombre,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            color = FootballWhite
+
+                                    Column {
+                                        Text(
+                                            text = equipo.nombre,
+                                            style = MaterialTheme.typography.titleLarge.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                color = FootballWhite
+                                            )
                                         )
-                                    )
+                                        Text(
+                                            text = ligaNombre,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = FootballWhite
+                                            )
+                                        )
+                                    }
                                 }
+
+                                Spacer(Modifier.height(10.dp))
+
+                                // DESCRIPCIÓN
+                                Text("Descripción:", fontWeight = FontWeight.Bold, color = FootballWhite)
+                                Text(equipo.descripcion, color = FootballWhite)
+
+                                Spacer(Modifier.height(10.dp))
+
+                                // FECHA
+                                val fecha = remember(equipo.fechaCreacion) {
+                                    java.text.SimpleDateFormat(
+                                        "dd/MM/yyyy HH:mm",
+                                        java.util.Locale.getDefault()
+                                    ).format(java.util.Date(equipo.fechaCreacion))
+                                }
+
+                                Text("Fecha de creación: $fecha", color = FootballWhite)
+
+                                // AUTOR
+                                Text("Autor ID: ${equipo.autorId}", color = FootballWhite)
+
+                                // GPS
+                                Text("Ubicación: ${equipo.latitud}, ${equipo.longitud}", color = FootballWhite)
                             }
                         }
                     }
