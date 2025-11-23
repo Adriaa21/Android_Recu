@@ -1,44 +1,45 @@
 package com.copernic.android_recu.data.firebase
 
+import android.net.Uri
 import com.copernic.android_recu.model.Equipo
 import com.copernic.android_recu.model.Liga
 import com.copernic.android_recu.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
 class FirebaseService {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
     private val USERS_COLLECTION = "users"
 
+    // ----------- AUTH -----------
     suspend fun registrarUsuario(username: String, email: String, password: String): Result<Unit> {
         return try {
-            val result = auth.createUserWithEmailAndPassword(email, password).await()
-            val uid = result.user?.uid ?: throw Exception("No se pudo obtener el ID del usuario.")
-
+            // 1️⃣ Comprobar si el username ya existe
             val usernameCheck = db.collection(USERS_COLLECTION)
                 .whereEqualTo("username", username)
                 .get()
                 .await()
 
-            if (!usernameCheck.isEmpty) {
-                throw Exception("El nombre de usuario ya está en uso.")
-            }
+            if (!usernameCheck.isEmpty) throw Exception("El nombre de usuario ya está en uso.")
 
+            // 2️⃣ Crear usuario en Auth
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            val uid = result.user?.uid ?: throw Exception("No se pudo obtener el ID del usuario.")
+
+            // 3️⃣ Crear documento en Firestore
             val user = User(id = uid, username = username, email = email)
             db.collection(USERS_COLLECTION).document(uid).set(user).await()
 
             Result.success(Unit)
+
         } catch (e: Exception) {
-            val message = when {
-                e.message?.contains("email address is already in use", true) == true ->
-                    "Este correo ya está registrado."
-                e.message?.contains("password", true) == true ->
-                    "La contraseña no cumple los requisitos mínimos."
-                else -> e.message ?: "Ha ocurrido un error inesperado."
-            }
+            val message = e.message ?: "Ha ocurrido un error."
             Result.failure(Exception(message))
         }
     }
@@ -48,7 +49,8 @@ class FirebaseService {
             auth.signInWithEmailAndPassword(email, password).await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(Exception("Correo o contraseña incorrectos."))
+            val msg = e.message ?: "Correo o contraseña incorrectos."
+            Result.failure(Exception(msg))
         }
     }
 
@@ -58,34 +60,62 @@ class FirebaseService {
             auth.sendPasswordResetEmail(correo).await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(Exception("No se pudo enviar el correo de recuperación."))
+            val msg = e.message ?: "No se pudo enviar el correo de recuperación."
+            Result.failure(Exception(msg))
         }
     }
 
     fun getCurrentUser() = auth.currentUser
+    fun logout() = auth.signOut()
 
-    fun logout() {
-        auth.signOut()
-    }
-
-    // Guarda la liga y establece el id dentro del documento
+    // ----------- LIGAS -----------
     suspend fun addLiga(liga: Liga) {
-        val docRef = db.collection("ligas").document()
-        val ligaConId = liga.copy(id = docRef.id)
-        docRef.set(ligaConId).await()
+        val ref = db.collection("ligas").document()
+        val ligaConId = liga.copy(id = ref.id)
+        ref.set(ligaConId).await()
     }
 
-    suspend fun obtenerLigas(): List<Liga> {
-        return try {
-            val snapshot = db.collection("ligas").get().await()
-            snapshot.toObjects(Liga::class.java)
-        } catch (e: Exception) {
-            emptyList()
-        }
+    suspend fun updateLiga(liga: Liga) {
+        db.collection("ligas").document(liga.id).set(liga).await()
     }
+
+    suspend fun deleteLiga(id: String) {
+        db.collection("ligas").document(id).delete().await()
+    }
+
+    suspend fun obtenerLigas(): List<Liga> =
+        try {
+            db.collection("ligas").get().await().toObjects(Liga::class.java)
+        } catch (e: Exception) { emptyList() }
+
+    // ----------- EQUIPOS -----------
+    fun generateEquipoId(): String =
+        db.collection("equipos").document().id
 
     suspend fun addEquipo(equipo: Equipo) {
         db.collection("equipos").document(equipo.id).set(equipo).await()
     }
 
+    suspend fun updateEquipo(equipo: Equipo) {
+        db.collection("equipos").document(equipo.id).set(equipo).await()
+    }
+
+    suspend fun deleteEquipo(id: String) {
+        db.collection("equipos").document(id).delete().await()
+    }
+
+    suspend fun obtenerEquipos(): List<Equipo> =
+        try {
+            db.collection("equipos").get().await().toObjects(Equipo::class.java)
+        } catch (e: Exception) { emptyList() }
+
+    // ----------- STORAGE -----------
+    suspend fun subirImagenAStorage(uri: Uri, carpeta: String): String {
+        val storageRef = FirebaseStorage.getInstance().reference
+        val nombreArchivo = "${UUID.randomUUID()}.jpg"
+        val archivoRef = storageRef.child("$carpeta/$nombreArchivo")
+
+        archivoRef.putFile(uri).await()
+        return archivoRef.downloadUrl.await().toString()
+    }
 }

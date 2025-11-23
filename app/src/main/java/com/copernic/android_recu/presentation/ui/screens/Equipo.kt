@@ -31,6 +31,9 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
     var equipos by remember { mutableStateOf<List<Equipo>>(emptyList()) }
     var ligas by remember { mutableStateOf<Map<String, Liga>>(emptyMap()) }
 
+    // 🔍 Campo de búsqueda
+    var filtro by remember { mutableStateOf("") }
+
     LaunchedEffect(Unit) {
         val snapEquipos = firebaseService.db.collection("equipos").get().await()
         equipos = snapEquipos.toObjects(Equipo::class.java)
@@ -40,30 +43,93 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
         ligas = listaLigas.associateBy { it.id }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(FootballWhite)) {
+    // 🔍 Filtrado
+    val equiposFiltrados = equipos.filter {
+        it.nombre.contains(filtro, ignoreCase = true)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(FootballWhite)
+    ) {
         RecuHeader(title = "Equipos")
 
-        if (equipos.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
-                Text("No hay equipos añadidos.", color = FootballBlack)
-            }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 16.dp)) {
-                items(equipos) { equipo ->
-                    val ligaNombre = ligas[equipo.ligaId]?.nombre ?: "Liga desconocida"
 
-                    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), colors = CardDefaults.cardColors(FootballGray)) {
-                        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Image(
-                                painter = rememberAsyncImagePainter(equipo.imagenUrl),
-                                contentDescription = equipo.nombre,
-                                modifier = Modifier.size(70.dp).padding(end = 12.dp),
-                                contentScale = ContentScale.Crop
-                            )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(16.dp)
+        ) {
 
-                            Column {
-                                Text(text = equipo.nombre, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, color = FootballWhite))
-                                Text(text = ligaNombre, style = MaterialTheme.typography.bodyMedium.copy(color = FootballWhite))
+            // 🔍 BARRA DE BÚSQUEDA
+            OutlinedTextField(
+                value = filtro,
+                onValueChange = { filtro = it },
+                label = { Text("Buscar equipo por nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (equipos.isEmpty()) {
+
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No hay equipos añadidos.", color = FootballBlack)
+                }
+
+            } else if (equiposFiltrados.isEmpty()) {
+
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No se encontraron equipos.")
+                }
+
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    items(equiposFiltrados) { equipo ->
+                        val ligaNombre = ligas[equipo.ligaId]?.nombre ?: "Liga desconocida"
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 10.dp),
+                            colors = CardDefaults.cardColors(FootballGray)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    painter = rememberAsyncImagePainter(equipo.imagenUrl),
+                                    contentDescription = equipo.nombre,
+                                    modifier = Modifier
+                                        .size(70.dp)
+                                        .padding(end = 12.dp),
+                                    contentScale = ContentScale.Crop
+                                )
+
+                                Column {
+                                    Text(
+                                        text = equipo.nombre,
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = FootballWhite
+                                        )
+                                    )
+                                    Text(
+                                        text = ligaNombre,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            color = FootballWhite
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
