@@ -297,22 +297,20 @@ fun EquipoPopup(
     LaunchedEffect(Unit) {
         val snap = firebaseService.db.collection("ligas").get().await()
         ligas = snap.toObjects(Liga::class.java)
-
         if (equipoExistente != null)
             ligaSeleccionada = ligas.find { it.id == equipoExistente.ligaId }
     }
 
     // GALERÍA
     val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
-    val selectorGaleria = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
-            uri -> uri?.let { imagenUri = it.toString() }
+    val selectorGaleria = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { imagenUri = it.toString() }
     }
 
     fun hasPermission(): Boolean {
         val p = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             Manifest.permission.READ_MEDIA_IMAGES
         else Manifest.permission.READ_EXTERNAL_STORAGE
-
         return ContextCompat.checkSelfPermission(context, p) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -345,7 +343,6 @@ fun EquipoPopup(
         title = { Text(if (equipoExistente != null) "Editar Equipo" else "Nuevo Equipo") },
         text = {
             Column {
-
                 OutlinedTextField(
                     value = nombre,
                     onValueChange = { nombre = it },
@@ -369,9 +366,7 @@ fun EquipoPopup(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(FootballGreen),
                     shape = RoundedButtonShape
-                ) {
-                    Text("Seleccionar imagen", color = FootballWhite)
-                }
+                ) { Text("Seleccionar imagen", color = FootballWhite) }
 
                 if (!imagenUri.isNullOrBlank()) {
                     Spacer(Modifier.height(6.dp))
@@ -386,9 +381,7 @@ fun EquipoPopup(
                 OutlinedButton(
                     onClick = { expanded = true },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(ligaSeleccionada?.nombre ?: "Selecciona una liga")
-                }
+                ) { Text(ligaSeleccionada?.nombre ?: "Selecciona una liga") }
 
                 DropdownMenu(
                     expanded = expanded,
@@ -414,9 +407,7 @@ fun EquipoPopup(
                 Button(
                     onClick = { showMap = true },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Seleccionar ubicación en mapa")
-                }
+                ) { Text("Seleccionar ubicación en mapa") }
             }
         },
         confirmButton = {
@@ -426,9 +417,7 @@ fun EquipoPopup(
                         return@Button
 
                     isLoading = true
-
                     scope.launch {
-
                         val imagenUrl = if (
                             imagenUri!!.startsWith("content://") ||
                             imagenUri!!.startsWith("file://")
@@ -463,13 +452,8 @@ fun EquipoPopup(
                 },
                 enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(FootballGreen)
-            ) {
-                Text(if (isLoading) "Subiendo..." else "Guardar", color = FootballWhite)
-            }
+            ) { Text(if (isLoading) "Subiendo..." else "Guardar", color = FootballWhite) }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
 }
-

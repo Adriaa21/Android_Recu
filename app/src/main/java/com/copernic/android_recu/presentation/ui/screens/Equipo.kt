@@ -1,5 +1,7 @@
 package com.copernic.android_recu.presentation.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,10 +19,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.copernic.android_recu.data.firebase.FirebaseService
 import com.copernic.android_recu.model.Equipo
 import com.copernic.android_recu.model.Liga
+import com.copernic.android_recu.model.User
 import com.copernic.android_recu.presentation.ui.theme.*
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -36,10 +36,11 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
 
     var equipos by remember { mutableStateOf<List<Equipo>>(emptyList()) }
     var ligas by remember { mutableStateOf<Map<String, Liga>>(emptyMap()) }
+    var usuarios by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
     var cargando by remember { mutableStateOf(true) }
-
     var filtro by remember { mutableStateOf("") }
 
+    // Cargar datos de Firebase
     LaunchedEffect(Unit) {
         scope.launch {
             val snapEquipos = firebaseService.db.collection("equipos").get().await()
@@ -47,6 +48,10 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
 
             val snapLigas = firebaseService.db.collection("ligas").get().await()
             ligas = snapLigas.toObjects(Liga::class.java).associateBy { it.id }
+
+            // Cargar todos los usuarios y mapearlos por id
+            val snapUsuarios = firebaseService.db.collection("usuarios").get().await()
+            usuarios = snapUsuarios.toObjects(User::class.java).associateBy { it.id }
 
             cargando = false
         }
@@ -91,7 +96,11 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                         .weight(1f)
                 ) {
                     items(equiposFiltrados) { equipo ->
+
                         val ligaNombre = ligas[equipo.ligaId]?.nombre ?: "Liga desconocida"
+
+                        // Obtener el username del autor desde el map de usuarios
+                        val autorUsername = usuarios[equipo.autorId]?.username ?: "Desconocido"
 
                         Card(
                             modifier = Modifier
@@ -145,14 +154,28 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                                         java.util.Locale.getDefault()
                                     ).format(java.util.Date(equipo.fechaCreacion))
                                 }
-
                                 Text("Fecha de creación: $fecha", color = FootballWhite)
 
-                                // AUTOR
-                                Text("Autor ID: ${equipo.autorId}", color = FootballWhite)
+                                // AUTOR (mostrar username)
+                                Text("Autor: $autorUsername", color = FootballWhite)
 
-                                // GPS
-                                Text("Ubicación: ${equipo.latitud}, ${equipo.longitud}", color = FootballWhite)
+                                Spacer(Modifier.height(8.dp))
+
+                                // BOTÓN PARA ABRIR MAPS
+                                Button(
+                                    onClick = {
+                                        val gmmIntentUri = Uri.parse(
+                                            "geo:${equipo.latitud},${equipo.longitud}?q=${equipo.latitud},${equipo.longitud}(${equipo.nombre})"
+                                        )
+                                        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+                                        mapIntent.setPackage("com.google.android.apps.maps")
+                                        navController.context.startActivity(mapIntent)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = ButtonDefaults.buttonColors(FootballGreen)
+                                ) {
+                                    Text("Ver ubicación en Maps", color = FootballWhite)
+                                }
                             }
                         }
                     }

@@ -5,11 +5,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.maps.android.compose.*
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 
-@OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun MapaSelectorPopup(
     latitudInicial: Double,
@@ -25,9 +27,11 @@ fun MapaSelectorPopup(
         title = { Text("Seleccionar ubicación") },
         text = {
             Column {
+
                 val cameraPositionState = rememberCameraPositionState {
                     position = CameraPosition.fromLatLngZoom(
-                        LatLng(latitud, longitud), 14f
+                        LatLng(latitud, longitud),
+                        14f
                     )
                 }
 
@@ -42,13 +46,14 @@ fun MapaSelectorPopup(
                     }
                 ) {
                     Marker(
-                        state = MarkerState(position = LatLng(latitud, longitud)),
+                        state = MarkerState(
+                            position = LatLng(latitud, longitud)
+                        ),
                         title = "Ubicación seleccionada"
                     )
                 }
 
                 Spacer(Modifier.height(8.dp))
-
                 Text("Latitud: $latitud")
                 Text("Longitud: $longitud")
             }
