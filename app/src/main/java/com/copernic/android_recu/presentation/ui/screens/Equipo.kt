@@ -50,7 +50,7 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
             ligas = snapLigas.toObjects(Liga::class.java).associateBy { it.id }
 
             // Cargar todos los usuarios y mapearlos por id
-            val snapUsuarios = firebaseService.db.collection("usuarios").get().await()
+            val snapUsuarios = firebaseService.db.collection("users").get().await()
             usuarios = snapUsuarios.toObjects(User::class.java).associateBy { it.id }
 
             cargando = false
