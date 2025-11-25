@@ -23,6 +23,7 @@ fun AppNavigation(startDestination: String = AppScreens.Login.route) {
         composable(AppScreens.Admin.route) { AdminScreen(navController, firebaseService) }
         composable(AppScreens.Liga.route) { LigaScreen(navController, firebaseService) }
         composable(AppScreens.Equipo.route) { EquipoScreen(navController, firebaseService) }
+        composable(AppScreens.Miperfil.route) { MiPerfilScreen(navController, firebaseService) }
     }
 
 }

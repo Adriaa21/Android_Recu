@@ -118,4 +118,49 @@ class FirebaseService {
         archivoRef.putFile(uri).await()
         return archivoRef.downloadUrl.await().toString()
     }
+
+    // ----------- PERFIL -----------
+
+    suspend fun obtenerPerfilUsuario(): User? {
+        val uid = auth.currentUser?.uid ?: return null
+        return try {
+            db.collection(USERS_COLLECTION).document(uid).get().await()
+                .toObject(User::class.java)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    suspend fun actualizarPerfil(username: String, email: String): Result<Unit> {
+        val uid = auth.currentUser?.uid ?: return Result.failure(Exception("No hay usuario logueado."))
+
+        return try {
+            // Comprobar si username ya existe en otro usuario
+            val check = db.collection(USERS_COLLECTION)
+                .whereEqualTo("username", username)
+                .get()
+                .await()
+
+            if (!check.isEmpty && check.documents.first().id != uid) {
+                return Result.failure(Exception("El nombre de usuario ya está en uso."))
+            }
+
+            // Actualizar email en Auth
+            auth.currentUser!!.updateEmail(email).await()
+
+            // Actualizar Firestore
+            db.collection(USERS_COLLECTION).document(uid).update(
+                mapOf(
+                    "username" to username,
+                    "email" to email
+                )
+            ).await()
+
+            Result.success(Unit)
+
+        } catch (e: Exception) {
+            Result.failure(Exception(e.message ?: "Error al actualizar perfil."))
+        }
+    }
+
 }
