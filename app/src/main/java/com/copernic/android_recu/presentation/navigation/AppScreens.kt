@@ -9,4 +9,5 @@ sealed class AppScreens(val route: String) {
     object Liga : AppScreens("liga")
     object Equipo : AppScreens("equipo")
     object Miperfil : AppScreens("perfil")
+    object Busqueda : AppScreens("busqueda")
 }

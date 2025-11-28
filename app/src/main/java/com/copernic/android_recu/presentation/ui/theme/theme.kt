@@ -112,17 +112,17 @@ fun RecuFooterPostLogin(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
 
-            // 🔵 BOTÓN 1 - Equipos
+            // 🔵 BOTÓN 1 - Búsqueda (icono lupa)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(onClick = { /* TODO: Equipos */ }) {
+                IconButton(onClick = { navController.navigate(AppScreens.Equipo.route) }) {
                     Icon(
-                        Icons.Filled.Menu,
-                        contentDescription = "Equipos",
+                        Icons.Filled.Search,     // 🔍 LUPA
+                        contentDescription = "Búsqueda",
                         tint = FootballBlack,
                         modifier = Modifier.size(30.dp)
                     )
                 }
-                Text("Equipos", color = FootballBlack)
+                Text("Búsqueda", color = FootballBlack)
             }
 
             // 🔵 BOTÓN 2 - Home
@@ -140,7 +140,7 @@ fun RecuFooterPostLogin(navController: NavController) {
 
             // 🔵 BOTÓN 3 - Perfil
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                IconButton(onClick = { /* TODO: Perfil */ }) {
+                IconButton(onClick = { navController.navigate(AppScreens.Miperfil.route) }) {
                     Icon(
                         Icons.Filled.Person,
                         contentDescription = "Perfil",
@@ -153,4 +153,3 @@ fun RecuFooterPostLogin(navController: NavController) {
         }
     }
 }
-
