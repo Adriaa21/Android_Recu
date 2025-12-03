@@ -112,17 +112,17 @@ fun RecuFooterPostLogin(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
 
-            // 🔵 BOTÓN 1 - Búsqueda (icono lupa)
+            // 🔵 BOTÓN 1 - Equipos
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(onClick = { navController.navigate(AppScreens.Equipo.route) }) {
                     Icon(
-                        Icons.Filled.Search,     // 🔍 LUPA
-                        contentDescription = "Búsqueda",
+                        Icons.Filled.List,     // Icono de lista para equipos
+                        contentDescription = "Equipos",
                         tint = FootballBlack,
                         modifier = Modifier.size(30.dp)
                     )
                 }
-                Text("Búsqueda", color = FootballBlack)
+                Text("Equipos", color = FootballBlack)
             }
 
             // 🔵 BOTÓN 2 - Home
