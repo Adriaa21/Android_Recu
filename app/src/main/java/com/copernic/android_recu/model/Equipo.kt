@@ -8,7 +8,6 @@ data class Equipo(
     val fechaCreacion: Long = System.currentTimeMillis(),
     val autorId: String = "",
 
-    // Ubicación GPS
     val latitud: Double = 0.0,
     val longitud: Double = 0.0,
 

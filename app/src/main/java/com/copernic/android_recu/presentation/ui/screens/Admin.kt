@@ -31,14 +31,14 @@ import com.copernic.android_recu.presentation.utils.MapaSelectorPopup
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-// ------------------- SCREEN -------------------
+// Pantalla principal de administración
 @Composable
 fun AdminScreen(navController: NavController, firebaseService: FirebaseService) {
     val vm = remember { AdminViewModel(firebaseService) }
     AdminBody(navController = navController, vm = vm, firebaseService = firebaseService)
 }
 
-// ------------------- BODY -------------------
+// Cuerpo principal de la pantalla de administración
 @Composable
 fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService: FirebaseService) {
     Column(
@@ -46,6 +46,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
             .fillMaxSize()
             .background(FootballWhite)
     ) {
+        // Header de la pantalla
         RecuHeader(title = "Panel de Administración")
 
         Column(
@@ -56,6 +57,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Botón para añadir liga
             Button(
                 onClick = { vm.openAddLiga() },
                 modifier = Modifier.fillMaxWidth(0.8f).height(50.dp),
@@ -65,6 +67,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
 
             Spacer(modifier = Modifier.height(15.dp))
 
+            // Botón para añadir equipo
             Button(
                 onClick = { vm.openAddEquipo() },
                 modifier = Modifier.fillMaxWidth(0.8f).height(50.dp),
@@ -74,6 +77,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
 
             Spacer(modifier = Modifier.height(30.dp))
 
+            // Botón para mostrar lista de ligas existentes
             Button(
                 onClick = { vm.showPopupListaLigas = true },
                 modifier = Modifier.fillMaxWidth(0.8f).height(50.dp),
@@ -83,6 +87,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Botón para mostrar lista de equipos existentes
             Button(
                 onClick = { vm.showPopupListaEquipos = true },
                 modifier = Modifier.fillMaxWidth(0.8f).height(50.dp),
@@ -91,10 +96,11 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
             ) { Text("Ver Equipos Existentes") }
         }
 
+        // Footer con navegación
         RecuFooterPostLogin(navController)
     }
 
-    // ---------- POPUP LIGA ----------
+    // POPUP para añadir/editar liga
     if (vm.showPopupLiga) {
         LigaPopup(
             firebaseService = firebaseService,
@@ -104,7 +110,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
         )
     }
 
-    // ---------- POPUP EQUIPO ----------
+    // POPUP para añadir/editar equipo
     if (vm.showPopupEquipo) {
         EquipoPopup(
             firebaseService = firebaseService,
@@ -114,7 +120,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
         )
     }
 
-    // ---------- LISTA LIGAS ----------
+    // POPUP lista de ligas existentes
     if (vm.showPopupListaLigas) {
         AlertDialog(
             onDismissRequest = { vm.showPopupListaLigas = false },
@@ -142,6 +148,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
             confirmButton = { TextButton(onClick = { vm.showPopupListaLigas = false }) { Text("Cerrar") } }
         )
 
+        // Confirmación de eliminación de liga
         if (vm.ligaAEliminar != null) {
             AlertDialog(
                 onDismissRequest = { vm.ligaAEliminar = null },
@@ -153,7 +160,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
         }
     }
 
-    // ---------- LISTA EQUIPOS ----------
+    // POPUP lista de equipos existentes
     if (vm.showPopupListaEquipos) {
         AlertDialog(
             onDismissRequest = { vm.showPopupListaEquipos = false },
@@ -183,6 +190,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
             confirmButton = { TextButton(onClick = { vm.showPopupListaEquipos = false }) { Text("Cerrar") } }
         )
 
+        // Confirmación de eliminación de equipo
         if (vm.equipoAEliminar != null) {
             AlertDialog(
                 onDismissRequest = { vm.equipoAEliminar = null },
@@ -195,7 +203,7 @@ fun AdminBody(navController: NavController, vm: AdminViewModel, firebaseService:
     }
 }
 
-// ------------------- POPUPS ------------------- //
+// POPUP para añadir/editar liga
 @Composable
 fun LigaPopup(
     firebaseService: FirebaseService,
@@ -211,11 +219,11 @@ fun LigaPopup(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // Launchers para permisos y selección de imagen
     val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
-    val selectorGaleria = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { imagenUri = it.toString() }
-    }
+    val selectorGaleria = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> uri?.let { imagenUri = it.toString() } }
 
+    // Verificar permisos para galería
     fun hasPermission(): Boolean {
         val p = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE
         return ContextCompat.checkSelfPermission(context, p) == PackageManager.PERMISSION_GRANTED
@@ -225,6 +233,7 @@ fun LigaPopup(
         else permissionRequest.launch(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES else Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
+    // Popup de liga
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (ligaExistente != null) "Editar Liga" else "Nueva Liga") },
@@ -249,9 +258,7 @@ fun LigaPopup(
                     scope.launch {
                         val imagenUrl = if (imagenUri!!.startsWith("content://") || imagenUri!!.startsWith("file://")) {
                             firebaseService.subirImagenAStorage(Uri.parse(imagenUri), "ligas")
-                        } else {
-                            imagenUri!!
-                        }
+                        } else imagenUri!!
 
                         val finalLiga = ligaExistente?.copy(nombre = nombre, descripcion = descripcion, imagen = imagenUrl)
                             ?: Liga(id = "", nombre = nombre, descripcion = descripcion, imagen = imagenUrl)
@@ -268,6 +275,7 @@ fun LigaPopup(
     )
 }
 
+// POPUP para añadir/editar equipo
 @Composable
 fun EquipoPopup(
     firebaseService: FirebaseService,
@@ -275,6 +283,7 @@ fun EquipoPopup(
     onDismiss: () -> Unit,
     onConfirm: (Equipo) -> Unit
 ) {
+    // Datos del equipo
     var nombre by rememberSaveable { mutableStateOf(equipoExistente?.nombre ?: "") }
     var descripcion by rememberSaveable { mutableStateOf(equipoExistente?.descripcion ?: "") }
     var imagenUri by rememberSaveable { mutableStateOf(equipoExistente?.imagenUrl) }
@@ -284,7 +293,7 @@ fun EquipoPopup(
 
     var expanded by remember { mutableStateOf(false) }
 
-    // UBICACIÓN
+    // Ubicación del equipo
     var latitud by rememberSaveable { mutableStateOf(equipoExistente?.latitud ?: 40.4167) }
     var longitud by rememberSaveable { mutableStateOf(equipoExistente?.longitud ?: -3.70325) }
     var showMap by remember { mutableStateOf(false) }
@@ -293,7 +302,7 @@ fun EquipoPopup(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // ------- Cargar ligas -------
+    // Cargar ligas disponibles
     LaunchedEffect(Unit) {
         val snap = firebaseService.db.collection("ligas").get().await()
         ligas = snap.toObjects(Liga::class.java)
@@ -301,11 +310,9 @@ fun EquipoPopup(
             ligaSeleccionada = ligas.find { it.id == equipoExistente.ligaId }
     }
 
-    // GALERÍA
+    // Launchers para permisos y selección de imagen
     val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
-    val selectorGaleria = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let { imagenUri = it.toString() }
-    }
+    val selectorGaleria = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> uri?.let { imagenUri = it.toString() } }
 
     fun hasPermission(): Boolean {
         val p = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
@@ -323,7 +330,7 @@ fun EquipoPopup(
         )
     }
 
-    // MAPA
+    // Mapa para seleccionar ubicación
     if (showMap) {
         MapaSelectorPopup(
             latitudInicial = latitud,
@@ -337,94 +344,39 @@ fun EquipoPopup(
         )
     }
 
-    // POPUP
+    // Popup de equipo
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (equipoExistente != null) "Editar Equipo" else "Nuevo Equipo") },
         text = {
             Column {
-                OutlinedTextField(
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    label = { Text("Nombre del equipo") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
+                OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre del equipo") }, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = descripcion,
-                    onValueChange = { descripcion = it },
-                    label = { Text("Descripción") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
+                OutlinedTextField(value = descripcion, onValueChange = { descripcion = it }, label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(8.dp))
-
-                Button(
-                    onClick = { openGallery() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(FootballGreen),
-                    shape = RoundedButtonShape
-                ) { Text("Seleccionar imagen", color = FootballWhite) }
-
-                if (!imagenUri.isNullOrBlank()) {
-                    Spacer(Modifier.height(6.dp))
-                    Text("✔ Imagen seleccionada")
-                }
-
+                Button(onClick = { openGallery() }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(FootballGreen), shape = RoundedButtonShape) { Text("Seleccionar imagen", color = FootballWhite) }
+                if (!imagenUri.isNullOrBlank()) { Spacer(Modifier.height(6.dp)); Text("✔ Imagen seleccionada") }
                 Spacer(Modifier.height(12.dp))
-
                 Text("Liga del equipo:")
                 Spacer(Modifier.height(6.dp))
-
-                OutlinedButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text(ligaSeleccionada?.nombre ?: "Selecciona una liga") }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    ligas.forEach { liga ->
-                        DropdownMenuItem(
-                            text = { Text(liga.nombre) },
-                            onClick = {
-                                ligaSeleccionada = liga
-                                expanded = false
-                            }
-                        )
-                    }
+                OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) { Text(ligaSeleccionada?.nombre ?: "Selecciona una liga") }
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    ligas.forEach { liga -> DropdownMenuItem(text = { Text(liga.nombre) }, onClick = { ligaSeleccionada = liga; expanded = false }) }
                 }
-
                 Spacer(Modifier.height(12.dp))
-
                 Text("Ubicación:")
                 Text("Lat: $latitud   Lon: $longitud")
                 Spacer(Modifier.height(6.dp))
-
-                Button(
-                    onClick = { showMap = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) { Text("Seleccionar ubicación en mapa") }
+                Button(onClick = { showMap = true }, modifier = Modifier.fillMaxWidth()) { Text("Seleccionar ubicación en mapa") }
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    if (nombre.isBlank() || descripcion.isBlank() || imagenUri.isNullOrBlank() || ligaSeleccionada == null)
-                        return@Button
-
+                    if (nombre.isBlank() || descripcion.isBlank() || imagenUri.isNullOrBlank() || ligaSeleccionada == null) return@Button
                     isLoading = true
                     scope.launch {
-                        val imagenUrl = if (
-                            imagenUri!!.startsWith("content://") ||
-                            imagenUri!!.startsWith("file://")
-                        ) {
-                            firebaseService.subirImagenAStorage(Uri.parse(imagenUri), "equipos")
-                        } else imagenUri!!
-
+                        val imagenUrl = if (imagenUri!!.startsWith("content://") || imagenUri!!.startsWith("file://")) firebaseService.subirImagenAStorage(Uri.parse(imagenUri), "equipos") else imagenUri!!
                         val uid = firebaseService.getCurrentUser()?.uid ?: "anon"
 
                         val finalEquipo = equipoExistente?.copy(

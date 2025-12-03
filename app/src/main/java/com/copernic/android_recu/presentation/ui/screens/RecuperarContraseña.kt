@@ -14,20 +14,22 @@ import com.copernic.android_recu.presentation.navigation.AppScreens
 import com.copernic.android_recu.presentation.ui.theme.*
 import kotlinx.coroutines.launch
 
+// Pantalla principal de recuperación de contraseña
 @Composable
 fun RecuperarContrasenaScreen(navController: NavController, firebaseService: FirebaseService) {
     RecuperarContrasenaBody(navController, firebaseService)
 }
 
+// Contenido de la pantalla
 @Composable
 fun RecuperarContrasenaBody(navController: NavController, firebaseService: FirebaseService) {
 
-    var correo by remember { mutableStateOf("") }
-    var mensajeError by remember { mutableStateOf<String?>(null) }
-    var mensajeExito by remember { mutableStateOf<String?>(null) }
-    var cargando by remember { mutableStateOf(false) }
+    var correo by remember { mutableStateOf("") } // Correo introducido por el usuario
+    var mensajeError by remember { mutableStateOf<String?>(null) } // Mensaje de error
+    var mensajeExito by remember { mutableStateOf<String?>(null) } // Mensaje de éxito
+    var cargando by remember { mutableStateOf(false) } // Muestra el loading
 
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope() // Scope para corrutinas
 
     Column(
         modifier = Modifier
@@ -36,8 +38,10 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
+        // Cabecera superior
         RecuHeader(title = "Recuperar contraseña")
 
+        // Zona central del formulario
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -47,6 +51,7 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            // Campo de texto para el correo
             OutlinedTextField(
                 value = correo,
                 onValueChange = {
@@ -60,12 +65,13 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Botón para enviar el correo de recuperación
             Button(
                 onClick = {
                     mensajeError = null
                     mensajeExito = null
 
-                    // Validaciones
+                    // Validaciones del correo
                     if (correo.isBlank()) {
                         mensajeError = "El correo no puede estar vacío"
                         return@Button
@@ -77,6 +83,7 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
 
                     cargando = true
 
+                    // Llamada a Firebase para enviar el correo
                     scope.launch {
                         val result = firebaseService.enviarCorreoRecuperacion(correo)
                         cargando = false
@@ -104,6 +111,7 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
                 colors = ButtonDefaults.buttonColors(FootballGreen),
                 shape = RoundedButtonShape
             ) {
+                // Spinner de carga o texto normal
                 if (cargando) {
                     CircularProgressIndicator(
                         color = FootballWhite,
@@ -114,11 +122,13 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
                 }
             }
 
+            // Mensaje de error
             mensajeError?.let {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = it, color = Color.Red)
             }
 
+            // Mensaje de éxito
             mensajeExito?.let {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = it, color = Color(0xFF2EA043)) // Verde éxito
@@ -126,6 +136,7 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Botón para volver al login
             TextButton(
                 onClick = { navController.navigate(AppScreens.Login.route) },
             ) {
@@ -133,6 +144,7 @@ fun RecuperarContrasenaBody(navController: NavController, firebaseService: Fireb
             }
         }
 
+        // Footer inferior antes de login
         RecuFooterPreLogin(navController)
     }
 }

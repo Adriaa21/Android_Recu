@@ -17,14 +17,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.copernic.android_recu.presentation.navigation.AppScreens
 
+// 🎨 COLORES PRINCIPALES DE LA APP
 val FootballGreen = Color(0xFF4CAF50)
 val FootballGreenDark = Color(0xFF1B5E20)
 val FootballWhite = Color(0xFFFFFFFF)
 val FootballBlack = Color(0xFF000000)
 val FootballGray = Color(0xFFBDBDBD)
 
+// 🔵 FORMA REDONDEADA PARA BOTONES
 val RoundedButtonShape = RoundedCornerShape(50.dp)
 
+// 🟩 CABECERA SUPERIOR REUTILIZABLE
 @Composable
 fun RecuHeader(title: String) {
     Box(
@@ -43,9 +46,11 @@ fun RecuHeader(title: String) {
     }
 }
 
+// 🟡 FOOTER PARA LOGIN Y REGISTRO
 @Composable
 fun RecuFooterPreLogin(navController: NavController) {
 
+    // Calcula el alto de la barra de navegación del sistema
     val navigationBarHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current)
 
     Box(
@@ -64,6 +69,7 @@ fun RecuFooterPreLogin(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
 
+            // 🔹 BOTÓN LOGIN
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(onClick = { navController.navigate(AppScreens.Login.route) }) {
                     Icon(
@@ -76,6 +82,7 @@ fun RecuFooterPreLogin(navController: NavController) {
                 Text("Login", color = FootballBlack)
             }
 
+            // 🔹 BOTÓN REGISTRO
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(onClick = { navController.navigate(AppScreens.Registro.route) }) {
                     Icon(
@@ -91,9 +98,11 @@ fun RecuFooterPreLogin(navController: NavController) {
     }
 }
 
+// 🟢 FOOTER PARA USUARIO LOGUEADO
 @Composable
 fun RecuFooterPostLogin(navController: NavController) {
 
+    // Calcula el alto de la barra inferior del sistema
     val navigationBarHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current)
 
     Box(
@@ -112,11 +121,11 @@ fun RecuFooterPostLogin(navController: NavController) {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
 
-            // 🔵 BOTÓN 1 - Equipos
+            // 🔵 BOTÓN 1 - EQUIPOS
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(onClick = { navController.navigate(AppScreens.Equipo.route) }) {
                     Icon(
-                        Icons.Filled.List,     // Icono de lista para equipos
+                        Icons.Filled.List,
                         contentDescription = "Equipos",
                         tint = FootballBlack,
                         modifier = Modifier.size(30.dp)
@@ -125,7 +134,7 @@ fun RecuFooterPostLogin(navController: NavController) {
                 Text("Equipos", color = FootballBlack)
             }
 
-            // 🔵 BOTÓN 2 - Home
+            // 🔵 BOTÓN 2 - HOME
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(onClick = { navController.navigate(AppScreens.Home.route) }) {
                     Icon(
@@ -138,7 +147,7 @@ fun RecuFooterPostLogin(navController: NavController) {
                 Text("Home", color = FootballBlack)
             }
 
-            // 🔵 BOTÓN 3 - Perfil
+            // 🔵 BOTÓN 3 - PERFIL
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 IconButton(onClick = { navController.navigate(AppScreens.Miperfil.route) }) {
                     Icon(

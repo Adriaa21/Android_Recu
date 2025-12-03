@@ -13,19 +13,20 @@ import com.copernic.android_recu.presentation.ui.theme.*
 import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.graphics.Color
 
-
+// Pantalla principal del perfil
 @Composable
 fun MiPerfilScreen(navController: NavController, firebase: FirebaseService) {
     MiPerfilBody(navController, firebase)
 }
 
+// Contenido de la pantalla de perfil
 @Composable
 fun MiPerfilBody(navController: NavController, firebase: FirebaseService) {
 
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") } // Nombre de usuario
+    var email by remember { mutableStateOf("") } // Email del usuario
 
-    // Cargar datos del usuario
+    // Cargar datos del usuario desde Firebase
     LaunchedEffect(Unit) {
         val uid = firebase.getCurrentUser()?.uid
         if (uid != null) {
@@ -47,9 +48,10 @@ fun MiPerfilBody(navController: NavController, firebase: FirebaseService) {
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
+        // Cabecera de la pantalla
         RecuHeader(title = "Mi Perfil")
 
-        // ⭐ ZONA CENTRAL (labels)
+        // Zona central con los datos del usuario
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,7 +62,7 @@ fun MiPerfilBody(navController: NavController, firebase: FirebaseService) {
             verticalArrangement = Arrangement.Center
         ) {
 
-            // LABEL USERNAME
+            // Texto del nombre de usuario
             Text(
                 text = "Nombre de usuario:",
                 color = FootballBlack
@@ -74,7 +76,7 @@ fun MiPerfilBody(navController: NavController, firebase: FirebaseService) {
 
             Spacer(modifier = Modifier.height(25.dp))
 
-            // LABEL EMAIL
+            // Texto del correo electrónico
             Text(
                 text = "Correo electrónico:",
                 color = FootballBlack
@@ -87,7 +89,7 @@ fun MiPerfilBody(navController: NavController, firebase: FirebaseService) {
             )
         }
 
-        // 🔴 BOTÓN DE CERRAR SESIÓN ABAJO
+        // Botón para cerrar sesión
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -97,7 +99,7 @@ fun MiPerfilBody(navController: NavController, firebase: FirebaseService) {
 
             Button(
                 onClick = {
-                    firebase.logout()
+                    firebase.logout() // Cierra sesión en Firebase
                     navController.navigate("login") {
                         popUpTo(0)
                     }
@@ -112,6 +114,7 @@ fun MiPerfilBody(navController: NavController, firebase: FirebaseService) {
             }
         }
 
+        // Footer inferior después de login
         RecuFooterPostLogin(navController)
     }
 }

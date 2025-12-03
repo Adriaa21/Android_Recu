@@ -24,23 +24,26 @@ import com.copernic.android_recu.presentation.ui.theme.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+// Pantalla principal de equipos
 @Composable
 fun EquipoScreen(navController: NavController, firebaseService: FirebaseService) {
     EquipoBody(navController, firebaseService)
 }
 
+// Contenido principal de la pantalla
 @Composable
 fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
 
     val scope = rememberCoroutineScope()
 
+    // Estados de datos
     var equipos by remember { mutableStateOf<List<Equipo>>(emptyList()) }
     var ligas by remember { mutableStateOf<Map<String, Liga>>(emptyMap()) }
     var usuarios by remember { mutableStateOf<Map<String, User>>(emptyMap()) }
     var cargando by remember { mutableStateOf(true) }
     var filtro by remember { mutableStateOf("") }
 
-    // Cargar datos de Firebase
+    // Cargar datos desde Firebase
     LaunchedEffect(Unit) {
         scope.launch {
             val snapEquipos = firebaseService.db.collection("equipos").get().await()
@@ -49,7 +52,6 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
             val snapLigas = firebaseService.db.collection("ligas").get().await()
             ligas = snapLigas.toObjects(Liga::class.java).associateBy { it.id }
 
-            // Cargar todos los usuarios y mapearlos por id
             val snapUsuarios = firebaseService.db.collection("users").get().await()
             usuarios = snapUsuarios.toObjects(User::class.java).associateBy { it.id }
 
@@ -57,20 +59,30 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
         }
     }
 
+    // Filtro por nombre del equipo
     val equiposFiltrados = equipos.filter {
         it.nombre.contains(filtro, ignoreCase = true)
     }
 
+    // Estructura general de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(FootballWhite)
     ) {
 
+        // Cabecera superior
         RecuHeader(title = "Equipos")
 
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        // Zona central con peso para no tapar el footer
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(16.dp)
+        ) {
 
+            // Campo de búsqueda
             OutlinedTextField(
                 value = filtro,
                 onValueChange = { filtro = it },
@@ -80,6 +92,7 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
 
             Spacer(Modifier.height(16.dp))
 
+            // Mostrar loading, mensaje vacío o lista
             if (cargando) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -90,6 +103,7 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                 }
             } else {
 
+                // Lista de equipos
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -98,10 +112,9 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                     items(equiposFiltrados) { equipo ->
 
                         val ligaNombre = ligas[equipo.ligaId]?.nombre ?: "Liga desconocida"
-
-                        // Obtener el username del autor desde el map de usuarios
                         val autorUsername = usuarios[equipo.autorId]?.username ?: "Desconocido"
 
+                        // Tarjeta de equipo
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -110,9 +123,8 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
 
-                                // IMAGEN + NOMBRE
+                                // Imagen y nombre
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-
                                     Image(
                                         painter = rememberAsyncImagePainter(equipo.imagenUrl),
                                         contentDescription = equipo.nombre,
@@ -130,24 +142,19 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                                                 color = FootballWhite
                                             )
                                         )
-                                        Text(
-                                            text = ligaNombre,
-                                            style = MaterialTheme.typography.bodyMedium.copy(
-                                                color = FootballWhite
-                                            )
-                                        )
+                                        Text(text = ligaNombre, color = FootballWhite)
                                     }
                                 }
 
                                 Spacer(Modifier.height(10.dp))
 
-                                // DESCRIPCIÓN
+                                // Descripción
                                 Text("Descripción:", fontWeight = FontWeight.Bold, color = FootballWhite)
                                 Text(equipo.descripcion, color = FootballWhite)
 
                                 Spacer(Modifier.height(10.dp))
 
-                                // FECHA
+                                // Fecha de creación
                                 val fecha = remember(equipo.fechaCreacion) {
                                     java.text.SimpleDateFormat(
                                         "dd/MM/yyyy HH:mm",
@@ -156,12 +163,12 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
                                 }
                                 Text("Fecha de creación: $fecha", color = FootballWhite)
 
-                                // AUTOR (mostrar username)
+                                // Autor del equipo
                                 Text("Autor: $autorUsername", color = FootballWhite)
 
                                 Spacer(Modifier.height(8.dp))
 
-                                // BOTÓN PARA ABRIR MAPS
+                                // Botón para abrir la ubicación en Google Maps
                                 Button(
                                     onClick = {
                                         val gmmIntentUri = Uri.parse(
@@ -183,6 +190,7 @@ fun EquipoBody(navController: NavController, firebaseService: FirebaseService) {
             }
         }
 
+        // Footer con navegación inferior
         RecuFooterPostLogin(navController)
     }
 }
