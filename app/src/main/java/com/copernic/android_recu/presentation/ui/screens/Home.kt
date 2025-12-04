@@ -16,16 +16,20 @@ import com.copernic.android_recu.presentation.navigation.AppScreens
 import com.copernic.android_recu.presentation.ui.theme.*
 import kotlinx.coroutines.tasks.await
 
+// Pantalla principal del Home
 @Composable
 fun HomeScreen(navController: NavController, firebaseService: FirebaseService) {
     HomeBody(navController, firebaseService)
 }
 
+// Cuerpo principal de la pantalla Home
 @Composable
 fun HomeBody(navController: NavController, firebaseService: FirebaseService) {
 
+    // Estado para el usuario logueado
     var currentUser by remember { mutableStateOf<User?>(null) }
 
+    // Cargar usuario actual desde Firebase
     LaunchedEffect(Unit) {
         val uid = firebaseService.getCurrentUser()?.uid
         if (uid != null) {
@@ -43,8 +47,10 @@ fun HomeBody(navController: NavController, firebaseService: FirebaseService) {
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
+        // Header de la pantalla
         RecuHeader(title = "Menú Principal")
 
+        // Contenedor de botones principales
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,11 +60,9 @@ fun HomeBody(navController: NavController, firebaseService: FirebaseService) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // ⬅️ BOTÓN EQUIPO (SINGULAR)
+            // Botón para ir a la pantalla de Equipo
             Button(
-                onClick = {
-                    navController.navigate(AppScreens.Equipo.route)
-                },
+                onClick = { navController.navigate(AppScreens.Equipo.route) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
@@ -70,6 +74,7 @@ fun HomeBody(navController: NavController, firebaseService: FirebaseService) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Botón para ir a la pantalla de Ligas
             Button(
                 onClick = { navController.navigate(AppScreens.Liga.route) },
                 modifier = Modifier
@@ -81,6 +86,7 @@ fun HomeBody(navController: NavController, firebaseService: FirebaseService) {
                 Text(text = "Ligas", color = FootballWhite)
             }
 
+            // Mostrar botón de Admin solo si el usuario es ADMIN
             if (currentUser?.rol == "ADMIN") {
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
@@ -96,6 +102,7 @@ fun HomeBody(navController: NavController, firebaseService: FirebaseService) {
             }
         }
 
+        // Footer con navegación post-login
         RecuFooterPostLogin(navController)
     }
 }

@@ -1,0 +1,86 @@
+package com.copernic.android_recu.presentation.utils
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+
+@Composable
+fun MapaSelectorPopup(
+    latitudInicial: Double,
+    longitudInicial: Double,
+    onDismiss: () -> Unit,
+    onSelect: (Double, Double) -> Unit
+) {
+    // 📍 Estados para guardar la posición seleccionada
+    var latitud by remember { mutableStateOf(latitudInicial) }
+    var longitud by remember { mutableStateOf(longitudInicial) }
+
+    // 🪟 Ventana emergente tipo diálogo
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Seleccionar ubicación") },
+        text = {
+            Column {
+
+                // 🎥 Posición inicial de la cámara del mapa
+                val cameraPositionState = rememberCameraPositionState {
+                    position = CameraPosition.fromLatLngZoom(
+                        LatLng(latitud, longitud),
+                        14f
+                    )
+                }
+
+                // 🗺️ Mapa de Google
+                GoogleMap(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp),
+                    cameraPositionState = cameraPositionState,
+
+                    // 👉 Al pulsar el mapa se actualiza la posición
+                    onMapClick = { latLng ->
+                        latitud = latLng.latitude
+                        longitud = latLng.longitude
+                    }
+                ) {
+
+                    // 📌 Marcador en la posición seleccionada
+                    Marker(
+                        state = MarkerState(
+                            position = LatLng(latitud, longitud)
+                        ),
+                        title = "Ubicación seleccionada"
+                    )
+                }
+
+                Spacer(Modifier.height(8.dp))
+
+                // 📄 Mostrar coordenadas actuales
+                Text("Latitud: $latitud")
+                Text("Longitud: $longitud")
+            }
+        },
+
+        // ✅ Botón confirmar selección
+        confirmButton = {
+            Button(onClick = { onSelect(latitud, longitud) }) {
+                Text("Confirmar")
+            }
+        },
+
+        // ❌ Botón cancelar
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}

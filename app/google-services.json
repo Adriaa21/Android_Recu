@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "352331062412",
-    "project_id": "recu-af40b",
-    "storage_bucket": "recu-af40b.firebasestorage.app"
+    "project_number": "200766705735",
+    "project_id": "ifurbotestlogin",
+    "storage_bucket": "ifurbotestlogin.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:352331062412:android:da47e1e0f07ab078276fa9",
+        "mobilesdk_app_id": "1:200766705735:android:a395c6d604e20c6a7ba162",
+        "android_client_info": {
+          "package_name": "com.copernic.adnroid_recu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHpkFVbvmMug7ZsuVmzovTwpaovkIAqGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:200766705735:android:54cba643fbe159f17ba162",
         "android_client_info": {
           "package_name": "com.copernic.android_recu"
         }
@@ -15,7 +34,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA_pUFshgHrf-zdYQN59enUARMGUx_WMdI"
+          "current_key": "AIzaSyAHpkFVbvmMug7ZsuVmzovTwpaovkIAqGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:200766705735:android:4eff77241954da0a7ba162",
+        "android_client_info": {
+          "package_name": "com.copernic.ifurbo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHpkFVbvmMug7ZsuVmzovTwpaovkIAqGk"
         }
       ],
       "services": {

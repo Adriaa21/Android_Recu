@@ -15,23 +15,27 @@ import com.copernic.android_recu.presentation.navigation.AppScreens
 import com.copernic.android_recu.presentation.ui.theme.*
 import kotlinx.coroutines.launch
 
+// Pantalla principal de registro
 @Composable
 fun RegistroScreen(navController: NavController, firebaseService: FirebaseService) {
     RegistroBody(navController, firebaseService)
 }
 
+// Contenido de la pantalla de registro
 @Composable
 fun RegistroBody(navController: NavController, firebaseService: FirebaseService) {
 
+    // Estados de los campos del formulario
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPass by remember { mutableStateOf("") }
 
+    // Estados para errores y carga
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope() // Scope para corrutinas
 
     Column(
         modifier = Modifier
@@ -40,8 +44,10 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
         verticalArrangement = Arrangement.SpaceBetween
     ) {
 
+        // Cabecera superior
         RecuHeader("Registrarse")
 
+        // Zona central del formulario
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -51,6 +57,7 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            // Campo nombre de usuario
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -60,6 +67,7 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
 
             Spacer(modifier = Modifier.height(14.dp))
 
+            // Campo correo electrónico
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -69,6 +77,7 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
 
             Spacer(modifier = Modifier.height(14.dp))
 
+            // Campo contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -79,6 +88,7 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
 
             Spacer(modifier = Modifier.height(14.dp))
 
+            // Campo confirmar contraseña
             OutlinedTextField(
                 value = confirmPass,
                 onValueChange = { confirmPass = it },
@@ -89,11 +99,13 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Botón de registro
             Button(
                 onClick = {
 
                     errorMessage = null
 
+                    // Validaciones básicas
                     if (username.isBlank()) {
                         errorMessage = "El nombre de usuario no puede estar vacío"
                         return@Button
@@ -113,19 +125,21 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
 
                     isLoading = true
 
+                    // Llamada a Firebase para registrar el usuario
                     scope.launch {
-                        // 🔥 CORREGIDO — ahora usa registrarUsuario()
                         val result = firebaseService.registrarUsuario(username, email, password)
                         isLoading = false
 
                         if (result.isSuccess) {
 
+                            // Si todo va bien, vuelve al login
                             navController.navigate(AppScreens.Login.route) {
                                 popUpTo(AppScreens.Registro.route) { inclusive = true }
                             }
 
                         } else {
 
+                            // Traducción de errores de Firebase
                             val msg = result.exceptionOrNull()?.message ?: "Error"
 
                             errorMessage = when {
@@ -145,6 +159,7 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
                 colors = ButtonDefaults.buttonColors(FootballGreen)
             ) {
 
+                // Loader o texto normal
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = FootballWhite,
@@ -155,6 +170,7 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
                 }
             }
 
+            // Mensaje de error si existe
             errorMessage?.let {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
@@ -165,6 +181,7 @@ fun RegistroBody(navController: NavController, firebaseService: FirebaseService)
             }
         }
 
+        // Footer inferior antes de login
         RecuFooterPreLogin(navController)
     }
 }

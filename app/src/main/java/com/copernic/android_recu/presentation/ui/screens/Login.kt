@@ -15,21 +15,23 @@ import com.copernic.android_recu.presentation.ui.theme.*
 import com.copernic.android_recu.presentation.navigation.AppScreens
 import kotlinx.coroutines.launch
 
+// Pantalla de inicio de sesión
 @Composable
 fun LoginScreen(navController: NavController, firebaseService: FirebaseService) {
     LoginBody(navController, firebaseService)
 }
 
+// Cuerpo principal de la pantalla de login
 @Composable
 fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") } // Correo ingresado por el usuario
+    var password by remember { mutableStateOf("") } // Contraseña ingresada por el usuario
 
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) } // Mensaje de error
+    var isLoading by remember { mutableStateOf(false) } // Estado de carga del login
 
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope() // Coroutine para operaciones asíncronas
 
     Column(
         modifier = Modifier
@@ -37,6 +39,7 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
             .background(FootballWhite),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+        // Header de la pantalla
         RecuHeader(title = "Iniciar Sesión")
 
         Column(
@@ -48,6 +51,7 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            // Campo de correo
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -57,6 +61,7 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
 
             Spacer(modifier = Modifier.height(14.dp))
 
+            // Campo de contraseña
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
@@ -65,13 +70,11 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // 🔥 AÑADIMOS EL BOTÓN DE RECUPERAR CONTRASEÑA AQUÍ
             Spacer(modifier = Modifier.height(10.dp))
 
+            // Botón para recuperar contraseña
             TextButton(
-                onClick = {
-                    navController.navigate(AppScreens.RContraseña.route)
-                }
+                onClick = { navController.navigate(AppScreens.RContraseña.route) }
             ) {
                 Text(
                     text = "¿Has olvidado tu contraseña?",
@@ -81,11 +84,12 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Botón de login
             Button(
                 onClick = {
                     errorMessage = null
 
-                    // Validación del correo
+                    // Validaciones de correo
                     if (email.isBlank()) {
                         errorMessage = "El correo no puede estar vacío"
                         return@Button
@@ -95,7 +99,7 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
                         return@Button
                     }
 
-                    // Validación de la contraseña
+                    // Validaciones de contraseña
                     if (password.isBlank()) {
                         errorMessage = "La contraseña no puede estar vacía"
                         return@Button
@@ -107,15 +111,18 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
 
                     isLoading = true
 
+                    // Intentar login con Firebase
                     scope.launch {
                         val result = firebaseService.loginUser(email, password)
                         isLoading = false
 
                         if (result.isSuccess) {
+                            // Navegar a Home si login correcto
                             navController.navigate(AppScreens.Home.route) {
                                 popUpTo(AppScreens.Login.route) { inclusive = true }
                             }
                         } else {
+                            // Mostrar mensaje de error según el fallo
                             val msg = result.exceptionOrNull()?.message ?: "Error al iniciar sesión"
 
                             errorMessage = when {
@@ -138,6 +145,7 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
                 shape = RoundedButtonShape,
                 colors = ButtonDefaults.buttonColors(FootballGreen)
             ) {
+                // Mostrar loader mientras se hace login
                 if (isLoading) {
                     CircularProgressIndicator(
                         color = FootballWhite,
@@ -148,6 +156,7 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
                 }
             }
 
+            // Mostrar mensaje de error
             errorMessage?.let {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
@@ -158,6 +167,7 @@ fun LoginBody(navController: NavController, firebaseService: FirebaseService) {
             }
         }
 
+        // Footer para pre-login
         RecuFooterPreLogin(navController)
     }
 }
